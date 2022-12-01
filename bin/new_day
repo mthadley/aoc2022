@@ -1,0 +1,33 @@
+#!/usr/bin/env ruby
+
+next_day = Dir
+  .entries(__dir__)
+  .filter_map do
+    if /day(?<num>\d+)/ =~ _1
+      num.to_i
+    end
+  end
+  .max
+  .to_i + 1
+
+new_file = File.expand_path("day#{next_day}", __dir__)
+
+File.open(new_file, "w") do |f|
+  f.write <<~RUBY
+    #!/usr/bin/env ruby
+    require_relative "../environment"
+
+    part1 do
+      42
+    end
+
+    __END__
+    foo
+    bar
+    baz
+  RUBY
+
+  f.chmod(0755)
+end
+
+puts "Created new file for Day #{next_day}"
