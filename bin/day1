@@ -6,7 +6,7 @@ part1 answer: 66719 do
 end
 
 part2 answer: 198551 do
-  ItemsList.parse(input).elves.sort.last(3).sum
+  ItemsList.parse(input).elves.max(3).sum
 end
 
 ItemsList = Struct.new(:elves) do
