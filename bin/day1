@@ -11,7 +11,7 @@ end
 
 ItemsList = Struct.new(:elves) do
   def self.parse(raw_list)
-    elves = raw_list.split("\n\n").map { _1.lines.map(&:to_i).sum }
+    elves = raw_list.split("\n\n").map { _1.lines.sum(&:to_i) }
     new(elves)
   end
 end
