@@ -5,6 +5,23 @@ part1 answer: 7908 do
   input.lines(chomp: true).sum { Rucksack.parse(_1).priority }
 end
 
+part2 answer: 2838 do
+  input.lines(chomp: true).map { Rucksack.parse(_1) }.each_slice(3).sum { Group.new(_1).priority }
+end
+
+class Group
+  attr_reader :rucksacks
+
+  def initialize(rucksacks)
+    raise ArgumentError, "Expect exactly 3 rucksacks" unless rucksacks.size == 3
+
+    @rucksacks = rucksacks
+  end
+
+  def badge = rucksacks.map(&:all).reduce(:&).first
+  def priority = Item.priority(badge)
+end
+
 class Rucksack
   attr_reader :first_comp, :second_comp
 
@@ -18,6 +35,7 @@ class Rucksack
     @second_comp = second_comp
   end
 
+  def all = first_comp | second_comp
   def common = first_comp & second_comp
   def priority = common.sum { Item.priority(_1) }
 end
