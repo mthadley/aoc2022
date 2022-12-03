@@ -5,6 +5,15 @@ part1 answer: 14163 do
   input.lines.sum { RPSRound.parse(_1).score }
 end
 
+part2 answer: 12091 do
+  input.lines.sum do |line|
+    opponent, you = line.split
+    opponent = Move.parse(opponent)
+
+    RPSRound.new(opponent, Move.inferred(opponent, you)).score
+  end
+end
+
 class RPSRound
   attr_reader :opponent, :you
 
@@ -47,6 +56,21 @@ end
 
 class Move
   attr_reader :move
+
+  def self.inferred(opponent, str)
+    move =
+      case [opponent.move, str]
+      in other,     "Y" then other
+      in :rock,     "X" then :scissors
+      in :rock,     "Z" then :paper
+      in :scissors, "X" then :paper
+      in :scissors, "Z" then :rock
+      in :paper,    "X" then :rock
+      in :paper,    "Z" then :scissors
+      end
+
+    new(move)
+  end
 
   def self.parse(str)
     move =
