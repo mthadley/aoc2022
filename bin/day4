@@ -5,6 +5,10 @@ part1 answer: 580 do
   input.lines.count { AssignmentPair.parse(_1).redundant? }
 end
 
+part2 answer: 895 do
+  input.lines.count { AssignmentPair.parse(_1).overlap? }
+end
+
 class AssignmentPair
   attr_reader :first_range, :second_range
 
@@ -28,6 +32,11 @@ class AssignmentPair
   def redundant?
     first_range.cover?(second_range) ||
       second_range.cover?(first_range)
+  end
+
+  def overlap?
+    first_range.cover?(second_range.first) ||
+      second_range.cover?(first_range.first)
   end
 end
 
