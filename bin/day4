@@ -9,9 +9,7 @@ part2 answer: 895 do
   input.lines.count { AssignmentPair.parse(_1).overlap? }
 end
 
-class AssignmentPair
-  attr_reader :first_range, :second_range
-
+AssignmentPair = Struct.new(:first_range, :second_range) do
   def self.parse(line)
     ranges = line.split(",").map do |str|
       if /(?<start>\d+)-(?<ending>\d+)/ =~ str
@@ -22,11 +20,6 @@ class AssignmentPair
     end
 
     new(*ranges)
-  end
-
-  def initialize(first_range, second_range)
-    @first_range = first_range
-    @second_range = second_range
   end
 
   def redundant?(by: :itself)
