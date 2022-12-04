@@ -29,15 +29,12 @@ class AssignmentPair
     @second_range = second_range
   end
 
-  def redundant?
-    first_range.cover?(second_range) ||
-      second_range.cover?(first_range)
+  def redundant?(by: :itself)
+    first_range.cover?(second_range.public_send(by)) ||
+      second_range.cover?(first_range.public_send(by))
   end
 
-  def overlap?
-    first_range.cover?(second_range.first) ||
-      second_range.cover?(first_range.first)
-  end
+  def overlap? = redundant?(by: :begin)
 end
 
 __END__
