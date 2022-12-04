@@ -27,7 +27,7 @@ class Rucksack
 
   def self.parse(line)
     middle = line.size / 2 - 1
-    new(line[0..middle].chars, line[middle + 1..].chars)
+    new(line[..middle].chars, line[middle + 1..].chars)
   end
 
   def initialize(first_comp, second_comp)
