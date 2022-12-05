@@ -5,30 +5,53 @@ part1 answer: "PSNRGBTFT" do
   Crane.parse(input).run.cargo_stacks.tops
 end
 
+part2 answer: "BNTZFPMMW" do
+  crane = Crane.parse(input)
+  crane.model_number = 9001
+
+  crane.run.cargo_stacks.tops
+end
+
 class Crane
   attr_reader :cargo_stacks, :instructions
+  attr_accessor :model_number
 
   def self.parse(input)
     cargo_lines, instruction_lines = input.split("\n\n")
 
     cargo_stacks = CargoStacks.parse(cargo_lines)
-    instructions =
-      instruction_lines.lines(chomp: true).map { Instruction.parse(_1) }
+    instructions = instruction_lines.lines.map { Instruction.parse(_1) }
 
     new(cargo_stacks, instructions)
   end
 
-  def initialize(cargo_stacks, instructions)
+  def initialize(cargo_stacks, instructions, model_number: 9000)
     @cargo_stacks = cargo_stacks
     @instructions = instructions
+    @model_number = model_number
   end
 
   def run
-    instructions.each do |instruction|
-      cargo_stacks.move(instruction)
-    end
-
+    instructions.each { move(_1) }
     self
+  end
+
+  private
+
+  def move(instruction)
+    cargo = cargo_stacks
+      .stack(instruction.source)
+      .pop(instruction.amount)
+      .public_send(extraction_order)
+
+    cargo_stacks.stack(instruction.target).push(*cargo)
+  end
+
+  def extraction_order
+    case model_number
+    in 9000 then :reverse
+    in 9001 then :itself
+    end
   end
 end
 
@@ -37,15 +60,13 @@ class CargoStacks
 
   def self.parse(lines)
     lines = lines.lines(chomp: true)
-    stacks = Array.new(lines.last.split.count)
+    stacks = []
 
     lines[...lines.size - 1]
       .map { |line| line.scan(/(?:\[(\w+)\]|\s{3})\s?/).flatten }
       .each do |row|
         row.each_with_index do |crate, i|
-          next if crate.nil?
-
-          (stacks[i] ||= []) << crate
+          (stacks[i] ||= []) << crate unless crate.nil?
         end
       end
 
@@ -53,25 +74,16 @@ class CargoStacks
   end
 
   def initialize(stacks) = @stacks = stacks
-
   def stack(n) = stacks[n - 1]
-
   def tops = stacks.map(&:last).join
-
-  def move(instruction)
-    cargo = stack(instruction.source).pop(instruction.amount)
-    stack(instruction.target).push(*cargo.reverse)
-  end
-
 end
 
 Instruction = Struct.new(:amount, :source, :target) do
   def self.parse(line)
-    if /move (?<amount>\d+) from (?<source>\d+) to (?<target>\d+)/ =~ line
-      new(amount.to_i, source.to_i, target.to_i)
-    else
+    /move (?<amount>\d+) from (?<source>\d+) to (?<target>\d+)/ =~ line or
       raise ArgumentError, "Invalid instruction: '#{line}'"
-    end
+
+    new(amount.to_i, source.to_i, target.to_i)
   end
 end
 
