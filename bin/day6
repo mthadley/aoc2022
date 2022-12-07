@@ -5,14 +5,21 @@ part1 answer: 1896 do
   ElfSignal.new(input).start_index
 end
 
-class ElfSignal
-  attr_reader :raw
+part2 answer: 3452 do
+  ElfSignal.new(input).message_index
+end
 
+class ElfSignal
   def initialize(str) = @raw = str
 
-  def start_index
-    raw.chars.each_cons(4).with_index do |chars, index|
-      return index + chars.size if chars.uniq.size == 4
+  def start_index   = unique_index_with_count(4)
+  def message_index = unique_index_with_count(14)
+
+  private
+
+  def unique_index_with_count(n)
+    @raw.chars.each_cons(n).with_index do |chars, index|
+      return index + n if chars.uniq.size == n
     end
   end
 end
