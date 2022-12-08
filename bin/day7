@@ -12,7 +12,15 @@ part1 answer: 1644735 do
     .sum
 end
 
+part2 answer: 1300850 do
+  FakeFilesystem
+    .from_shell_history(input.lines)
+    .smallest_directory_to_free(update_size: 30_000_000)
+end
+
 class FakeFilesystem
+  TOTAL_SIZE = 70_000_000
+
   attr_reader :files
 
   def self.from_shell_history(lines)
@@ -40,12 +48,23 @@ class FakeFilesystem
   def initialize(files) = @files = files
 
   def directory_sizes
-    files.each_with_object(Hash.new(0)) do |(file, size), sizes|
-      file.dirname.ascend do |path|
-        sizes[path] += size
+    @directory_sizes ||=
+      files.each_with_object(Hash.new(0)) do |(file, size), sizes|
+        file.dirname.ascend do |path|
+          sizes[path] += size
+        end
       end
-    end
   end
+
+  def smallest_directory_to_free(update_size:)
+    directory_sizes
+      .values
+      .filter { |dir_size| free_space + dir_size > update_size }
+      .min
+  end
+
+  def free_space = TOTAL_SIZE - used_space
+  def used_space = directory_sizes.fetch(Pathname.new("/"))
 end
 
 __END__
