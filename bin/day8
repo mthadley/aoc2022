@@ -7,6 +7,11 @@ part1 answer: 1782 do
   Forest.parse(input).visible.count
 end
 
+part2 answer: 474606 do
+  forest = Forest.parse(input)
+  forest.map { forest.scenic_score(_2) }.max
+end
+
 class Forest
   include Enumerable
 
@@ -24,7 +29,7 @@ class Forest
 
   def visible
     filter do |_, point|
-      edge?(point) || tall?(point)
+      edge?(point) || sees_out?(point)
     end
   end
 
@@ -40,16 +45,39 @@ class Forest
     end
   end
 
+  def scenic_score(point)
+    height = self[point]
+    score = 1
+
+    Point.cardinals.each do |cardinal|
+      current = point + cardinal
+      trees = 0
+
+      loop do
+        break if !in_forest?(current)
+        trees += 1
+
+        break if self[current] >= height
+        current += cardinal
+      end
+
+      score *= trees
+    end
+
+    score
+  end
+
   private
 
   def edge?(point)
-    point.x == 0 ||
-      point.x == max_width ||
-      point.y == 0 ||
-      point.y == max_height
+    point.x == 0 || point.x == max_width || point.y == 0 || point.y == max_height
   end
 
-  def tall?(point)
+  def in_forest?(point)
+    (0..max_width).include?(point.x) && (0..max_height).include?(point.y)
+  end
+
+  def sees_out?(point)
     height = self[point]
 
     Point.cardinals.each do |cardinal|
