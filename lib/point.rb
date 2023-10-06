@@ -29,10 +29,11 @@ class Point
     RUBY
   end
 
+  def distance(other) = Math.sqrt((other.x - x) ** 2 + (other.y - y) ** 2)
+
   def cardinals = self.class.cardinals.map { _1 + self }
   def ordinals = self.class.ordinals.map { _1 + self }
   def principals = cardinals + ordinals
-
 
   def ==(other)
     return false unless other.is_a?(self.class)
