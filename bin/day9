@@ -5,38 +5,82 @@ require "set"
 require_relative "../lib/point"
 
 part1 answer: 6018 do
-  rope    = Rope.new
-  motions = input.lines.map { Motion.parse(_1) }
-  visited = Set[rope.tail]
+  Day9.solve(rope_length: 2)
+end
 
-  motions.each do |motion|
-    goal    = rope.head + motion.to_point
-    step    = motion.to_unit
-    current = rope.head
+# 4740 too high
+part2 do
+  Day9.solve(rope_length: 10)
+end
 
-    until current == goal
-      rope.move(step)
-      visited << rope.tail
-      current += step
+module Day9
+  module_function
+
+  def solve(rope_length:)
+    rope    = Rope.new(length: rope_length)
+    motions = input.lines.map { Motion.parse(_1) }
+    visited = Set[rope.tail]
+
+    motions.each do |motion|
+      goal    = rope.head + motion.to_point
+      step    = motion.to_unit
+      current = rope.head
+
+      until current == goal
+        rope.move(step)
+        visited << rope.tail
+        current += step
+      end
     end
-  end
 
-  visited.size
+    visited.size
+  end
 end
 
 class Rope
-  MOVE_TAIL_THRESHOLD = 2.0
+  MOVE_THRESHOLD = 2.0
 
-  attr_reader :head, :tail
-
-  def initialize
-    @head = Point.origin
-    @tail = Point.origin
+  def initialize(length:)
+    @points = [Point.origin] * length
   end
 
-  def move(unit)
-    @head = head + unit
-    @tail = head - unit if head.distance(tail) >= MOVE_TAIL_THRESHOLD
+  def head = @points.first
+  def tail = @points.last
+
+  def move(initial_unit)
+    previous_old_position = head
+    @points[0] = head + initial_unit
+    @points.each.with_index do |current, i|
+      previous = @points[i - 1]
+
+      next   if i.zero?
+      return if current.distance(previous) < MOVE_THRESHOLD
+
+      @points[i] = previous_old_position
+      previous_old_position = current
+    end
+  end
+
+  def inspect
+    lines = []
+    min_x, max_x = @points.map(&:x).minmax
+    min_y, max_y = @points.map(&:y).minmax
+
+    (min_y..max_y).each do |y|
+      line = ""
+      (min_x..max_x).each do |x|
+        i = @points.find_index(Point[x, y])
+        symbol = case i
+                 when 0   then "H"
+                 when nil then "."
+                 else          i.to_s
+                 end
+
+        line << symbol
+      end
+      lines << line
+    end
+    lines.reverse.join("\n") + "\n"
   end
 end
 
